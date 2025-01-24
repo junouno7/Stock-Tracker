@@ -5,7 +5,6 @@ from datetime import datetime
 
 app = Flask(__name__, template_folder='templates')
 
-# Database initialization
 def init_db():
     conn = sqlite3.connect('stocks.db')
     c = conn.cursor()
@@ -18,7 +17,6 @@ def init_db():
     conn.commit()
     conn.close()
 
-# Initialize database on startup
 with app.app_context():
     init_db()
 
@@ -46,7 +44,6 @@ def add_stock():
     conn = get_db()
     c = conn.cursor()
     
-    # Check if stock already exists
     c.execute('SELECT ticker FROM user_stocks WHERE ticker = ?', (ticker,))
     if c.fetchone() is None:
         c.execute('INSERT INTO user_stocks (ticker) VALUES (?)', (ticker,))
@@ -78,11 +75,9 @@ def get_stock_data():
 @app.route('/get_chart_data/<ticker>')
 def get_chart_data(ticker):
     try:
-        # Get historical data for the last month
         stock = yf.Ticker(ticker)
-        hist = stock.history(period='1mo')  # You can adjust the period as needed
+        hist = stock.history(period='1mo')
         
-        # Convert the data to a format suitable for charts
         chart_data = {
             'dates': hist.index.strftime('%Y-%m-%d').tolist(),
             'prices': hist['Close'].tolist(),

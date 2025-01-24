@@ -7,10 +7,7 @@
     <link rel="stylesheet" href="{{  url_for('static', filename='style.css')  }}">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
-    <!-- Include Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-
-    <!-- Include Typeahead.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/typeahead.js/0.11.1/typeahead.bundle.min.js"></script>
     <link rel="apple-touch-icon" sizes="180x180" href="/favicon_io/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon_io/favicon-32x32.png') }}">
@@ -19,16 +16,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="glass-container">
-        <form id="add-ticker-form">
-            <input type="text" id="new-ticker" placeholder="Enter a stock or crypto" required>
-            <div id="autocomplete-suggestions" style="display: none;"></div>
-            <button type="submit">Add</button>
-        </form>
-        <p id="timer">Next update in <span id="counter"></span> seconds.</p>
-        <div id="tickers-grid">
-
-        </div>
+    <form id="add-ticker-form" class="glass-effect">
+        <input type="text" id="new-ticker" placeholder="Enter a stock or crypto" required>
+        <div id="autocomplete-suggestions" style="display: none;"></div>
+        <button type="submit">Add</button>
+    </form>
+    <p id="timer">Next update in <span id="counter"></span> seconds.</p>
+    <div id="tickers-grid">
     </div>
 </body>
 </html>

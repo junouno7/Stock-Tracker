@@ -1,11 +1,9 @@
-/* General Styles */
 body {
     font-family: 'Inter', 'Arial', sans-serif;
     margin: 0;
     padding: 20px;
     color: #ffffff;
     min-height: 100vh;
-    /* Modern gradient background with overlay */
     background-image: 
         linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
         url('/static/images/stock-bg.jpg');
@@ -25,7 +23,14 @@ h2, p {
     font-size: 24px;
 }
 
-/* Header Section */
+.glass-effect {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 15px;
+}
+
 form {
     display: flex;
     justify-content: center;
@@ -58,14 +63,13 @@ input[type="text"]::placeholder {
     color: rgba(255, 255, 255, 0.7);
 }
 
-/* Form button (Add button) styling */
 #add-ticker-form button {
     background: linear-gradient(135deg, #007bff, #00c6ff);
     color: #fff;
     border: none;
     padding: 15px 25px;
     font-size: 16px;
-    border-radius: 16px;  /* Increased border-radius for rounded corners */
+    border-radius: 16px;
     cursor: pointer;
     transition: all 0.3s ease;
     text-transform: uppercase;
@@ -80,11 +84,10 @@ input[type="text"]::placeholder {
 }
 
 button:disabled {
-    background-color: #aaa; /* Gray for disabled state */
+    background-color: #aaa;
     cursor: not-allowed;
 }
 
-/* Timer Section */
 #timer {
     text-align: center;
     margin: 20px auto;
@@ -94,7 +97,6 @@ button:disabled {
     letter-spacing: 1px;
 }
 
-/* Tickers Grid */
 #tickers-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -104,7 +106,6 @@ button:disabled {
     max-width: 1200px;
 }
 
-/* Stock Boxes */
 .stock-box {
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(10px);
@@ -154,7 +155,6 @@ button:disabled {
     transform: translateY(-2px);
 }
 
-/* Flash Classes */
 .green-flash {
     animation: flashGreen 2s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -182,7 +182,6 @@ button:disabled {
     100% { background: rgba(255, 255, 255, 0.1); }
 }
 
-/* Price Colors */
 .dark-red {
     color: #ff4d4f !important;
     text-shadow: 0 0 10px rgba(255, 77, 79, 0.3);
@@ -234,7 +233,6 @@ button:disabled {
     background: rgba(255, 255, 255, 0.2);
 }
 
-/* Scrollbar Styling */
 ::-webkit-scrollbar {
     width: 8px;
 }
@@ -252,7 +250,6 @@ button:disabled {
     background: rgba(255, 255, 255, 0.4);
 }
 
-/* Responsive Design */
 @media (max-width: 768px) {
     body {
         padding: 10px;
@@ -274,16 +271,4 @@ button:disabled {
     .stock-box p {
         font-size: 16px;
     }
-}
-
-/* Glass morphism effect for containers */
-.glass-container {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 15px;
-    padding: 20px;
-    margin: 20px auto;
-    max-width: 1200px;
 }

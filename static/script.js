@@ -2,9 +2,8 @@ var tickers = [];
 var lastPrices = {};
 var glocounter = 15;
 var timerInterval;
-var alertedTickers = {}; // Object to track tickers that already showed an alert
+var alertedTickers = {};
 
-// Load tickers from database on startup
 function loadTickers() {
     $.ajax({
         url: '/api/stocks',
@@ -21,19 +20,16 @@ function loadTickers() {
         },
         error: function(xhr, status, error) {
             console.error('Error loading tickers:', error);
-            // Show user-friendly error message
             alert('Failed to load tickers. Please try again later.');
         }
     });
 }
 
 function startUpdateCycle() {
-    // Clear any existing interval first
     if (timerInterval) {
         clearInterval(timerInterval);
     }
     
-    // Reset counter and start new interval
     counter = glocounter;
     updatePrices();
     timerInterval = setInterval(function () {
@@ -47,10 +43,8 @@ function startUpdateCycle() {
 }
 
 $(document).ready(function () {
-    // Load existing tickers from database
     loadTickers();
 
-    // Add new ticker logic
     $('#add-ticker-form').submit(function (e) {
         e.preventDefault();
         var newTicker = $('#new-ticker').val().toUpperCase();
@@ -66,7 +60,6 @@ $(document).ready(function () {
                     addTickerToGrid(newTicker);
                     updatePrices();
 
-                    // Restart timer if it's not running
                     if (!timerInterval) {
                         counter = glocounter;
                         startUpdateCycle();
@@ -81,12 +74,10 @@ $(document).ready(function () {
         hideSuggestions();
     });
 
-    // Function to hide the suggestion box
     function hideSuggestions() {
-        $('#autocomplete-suggestions').hide(); // Hide suggestions container
+        $('#autocomplete-suggestions').hide();
     }
 
-    // Remove ticker logic
     $(document).on('click', '.remove-btn', function(e) {
         e.stopPropagation();
         const tickerToRemove = $(this).data('ticker');
@@ -110,33 +101,28 @@ $(document).ready(function () {
         });
     });
 
-    // Autocomplete function
     $('#new-ticker').on('input', function () {
         var query = $(this).val().toUpperCase();
         showSuggestions(query);
     });
 
-    // Handle suggestion click
     $('#autocomplete-suggestions').on('click', '.suggestion-item', function () {
         var selectedTicker = $(this).text();
         $('#new-ticker').val(selectedTicker);
-        hideSuggestions(); // Hide suggestions after selection
+        hideSuggestions();
     });
 
-    // Function to show suggestions based on query
     function showSuggestions(query) {
-        $('#autocomplete-suggestions').empty(); // Clear previous suggestions
+        $('#autocomplete-suggestions').empty();
         if (query.length > 0) {
             var filteredTickers = Alltickers.filter(function (ticker) {
                 return ticker.toLowerCase().includes(query.toLowerCase());
             });
 
-            // Display matching tickers
             filteredTickers.forEach(function (ticker) {
                 $('#autocomplete-suggestions').append('<div class="suggestion-item">' + ticker + '</div>');
             });
 
-            // Show suggestions container if matches exist
             if (filteredTickers.length > 0) {
                 $('#autocomplete-suggestions').show();
             } else {
@@ -158,7 +144,6 @@ function addTickerToGrid(ticker) {
         </div>`;
     $('#tickers-grid').append(stockBox);
 
-    // Add click handler for the stock box (for chart)
     $(`#${ticker}`).on('click', function(e) {
         if (!$(e.target).hasClass('remove-btn')) {
             showChart(ticker);
@@ -167,17 +152,14 @@ function addTickerToGrid(ticker) {
 }
 
 function showChart(ticker) {
-    // Open in a new tab
     window.open(`https://finance.yahoo.com/quote/${ticker}/chart?p=${ticker}`, '_blank');
 }
 
-// Function to handle errors and remove the ticker box
 function handleStockError(ticker) {
     if (!alertedTickers[ticker]) {
         alert(`Invalid ticker symbol: ${ticker}`);
         alertedTickers[ticker] = true;
         
-        // Remove the invalid ticker
         $.ajax({
             url: `/api/stocks/${ticker}`,
             type: 'DELETE',
@@ -185,7 +167,6 @@ function handleStockError(ticker) {
                 tickers = tickers.filter(t => t !== ticker);
                 $(`#${ticker}`).remove();
                 
-                // Check if we need to stop the timer
                 if (tickers.length === 0) {
                     clearInterval(timerInterval);
                     timerInterval = null;
@@ -209,11 +190,6 @@ function updatePrices() {
             contentType: 'application/json; charset=utf-8',
             dataType: 'json',
             success: function(data) {
-                // If data is invalid or empty, handle the error case
-                // if (!data || !data.currentPrice || !data.openPrice) {
-                //     handleStockError(ticker);
-                //     return; // Exit the function to avoid further processing
-                // }
                 var changePercent = ((data.currentPrice - data.openPrice) / data.openPrice) * 100;
                 var colorClass;
                 if (changePercent <= -2) {
@@ -255,7 +231,6 @@ function updatePrices() {
                 }, 2200);
             },
             error: function(xhr, status, error) {
-                // Handle case where no data is found (e.g., delisted symbol)
                 handleStockError(ticker);
             }
         });
