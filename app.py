@@ -75,5 +75,22 @@ def get_stock_data():
     return jsonify({'currentPrice': data.iloc[-1].Close,
                    'openPrice': data.iloc[-1].Open})
 
+@app.route('/get_chart_data/<ticker>')
+def get_chart_data(ticker):
+    try:
+        # Get historical data for the last month
+        stock = yf.Ticker(ticker)
+        hist = stock.history(period='1mo')  # You can adjust the period as needed
+        
+        # Convert the data to a format suitable for charts
+        chart_data = {
+            'dates': hist.index.strftime('%Y-%m-%d').tolist(),
+            'prices': hist['Close'].tolist(),
+            'symbol': ticker
+        }
+        return jsonify(chart_data)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+
 if __name__ == '__main__':
     app.run(debug=True)

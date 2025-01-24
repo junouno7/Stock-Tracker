@@ -1,6 +1,6 @@
 var tickers = [];
 var lastPrices = {};
-var counter = 5;
+var glocounter = 15;
 var timerInterval;
 var alertedTickers = {}; // Object to track tickers that already showed an alert
 
@@ -21,23 +21,29 @@ function loadTickers() {
         },
         error: function(xhr, status, error) {
             console.error('Error loading tickers:', error);
+            // Show user-friendly error message
+            alert('Failed to load tickers. Please try again later.');
         }
     });
 }
 
 function startUpdateCycle() {
-    // Ensure the interval starts only if not already running
-    if (!timerInterval) {
-        updatePrices(); 
-        timerInterval = setInterval(function () {
-            counter--;
-            $('#counter').text(counter+' ');
-            if (counter <= 0) {
-                updatePrices();
-                counter = 5;
-            }
-        }, 1000);
+    // Clear any existing interval first
+    if (timerInterval) {
+        clearInterval(timerInterval);
     }
+    
+    // Reset counter and start new interval
+    counter = glocounter;
+    updatePrices();
+    timerInterval = setInterval(function () {
+        counter--;
+        $('#counter').text(counter + ' ');
+        if (counter <= 0) {
+            updatePrices();
+            counter = glocounter;
+        }
+    }, 1000);
 }
 
 $(document).ready(function () {
@@ -60,8 +66,9 @@ $(document).ready(function () {
                     addTickerToGrid(newTicker);
                     updatePrices();
 
-                    // Start update cycle only if it's the first ticker
-                    if (tickers.length === 1 && !timerInterval) {
+                    // Restart timer if it's not running
+                    if (!timerInterval) {
+                        counter = glocounter;
                         startUpdateCycle();
                     }
                 },
@@ -71,7 +78,7 @@ $(document).ready(function () {
             });
         }
         $('#new-ticker').val('');
-        hideSuggestions(); // Hide suggestions after adding ticker
+        hideSuggestions();
     });
 
     // Function to hide the suggestion box
@@ -80,8 +87,10 @@ $(document).ready(function () {
     }
 
     // Remove ticker logic
-    $('#tickers-grid').on('click', '.remove-btn', function(){
-        var tickerToRemove = $(this).data('ticker');
+    $(document).on('click', '.remove-btn', function(e) {
+        e.stopPropagation();
+        const tickerToRemove = $(this).data('ticker');
+        
         $.ajax({
             url: `/api/stocks/${tickerToRemove}`,
             type: 'DELETE',
@@ -89,10 +98,9 @@ $(document).ready(function () {
                 tickers = tickers.filter(t => t !== tickerToRemove);
                 $(`#${tickerToRemove}`).remove();
 
-                // Stop the update cycle if no tickers are left
                 if (tickers.length === 0) {
                     clearInterval(timerInterval);
-                    timerInterval = null;  // Reset the interval variable
+                    timerInterval = null;
                     $('#counter').text('');
                 }
             },
@@ -141,37 +149,55 @@ $(document).ready(function () {
 });
 
 function addTickerToGrid(ticker) {
-    $('#tickers-grid').append(`
+    const stockBox = `
         <div id="${ticker}" class="stock-box">
             <h2>${ticker}</h2>
             <p id="${ticker}-price"></p>
             <p id="${ticker}-pct"></p>
             <button class="remove-btn" data-ticker="${ticker}">Remove</button>
-        </div>`);
+        </div>`;
+    $('#tickers-grid').append(stockBox);
+
+    // Add click handler for the stock box (for chart)
+    $(`#${ticker}`).on('click', function(e) {
+        if (!$(e.target).hasClass('remove-btn')) {
+            showChart(ticker);
+        }
+    });
+}
+
+function showChart(ticker) {
+    // Open in a new tab
+    window.open(`https://finance.yahoo.com/quote/${ticker}/chart?p=${ticker}`, '_blank');
 }
 
 // Function to handle errors and remove the ticker box
 function handleStockError(ticker) {
     if (!alertedTickers[ticker]) {
-        alertedTickers[ticker] = true;  // Mark as alerted
-        alert(`${ticker}: No data found, symbol may be delisted`);
-    }
-    $.ajax({
-        url: `/api/stocks/${ticker}`,
-        type: 'DELETE',
-        success: function() {
-            $(`#${ticker}`).remove();
-            tickers = tickers.filter(t => t !== ticker);
-
-            if (tickers.length <= 0) {
-                clearInterval(timerInterval); // Stop the interval that updates stock prices
-                $('#counter').text('');
+        alert(`Invalid ticker symbol: ${ticker}`);
+        alertedTickers[ticker] = true;
+        
+        // Remove the invalid ticker
+        $.ajax({
+            url: `/api/stocks/${ticker}`,
+            type: 'DELETE',
+            success: function(response) {
+                tickers = tickers.filter(t => t !== ticker);
+                $(`#${ticker}`).remove();
+                
+                // Check if we need to stop the timer
+                if (tickers.length === 0) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                    counter = glocounter;
+                    $('#counter').text('');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error removing invalid ticker:', error);
             }
-        },
-        error: function(xhr, status, error) {
-            console.error('Error removing invalid ticker:', error);
-        }
-    });
+        });
+    }
 }
 
 function updatePrices() {
@@ -207,7 +233,7 @@ function updatePrices() {
                 }
 
                 $(`#${ticker}-price`).text(`$${data.currentPrice.toFixed(2)}`);
-                $(`#${ticker}-pct`).text(`${changePercent.toFixed(2)}%`);
+                $(`#${ticker}-pct`).text(`Last 24HR: ${changePercent.toFixed(2)}%`);
                 $(`#${ticker}-price`).removeClass('dark-red red gray green dark-green').addClass(colorClass);
                 $(`#${ticker}-pct`).removeClass('dark-red red gray green dark-green').addClass(colorClass);
                 
