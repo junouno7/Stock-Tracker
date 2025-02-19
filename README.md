@@ -11,6 +11,10 @@ A real-time stock price tracking application built with Flask and JavaScript tha
 - **Auto-Complete**: Smart ticker symbol suggestions while typing
 - **Real-Time Updates**: Prices update automatically every few seconds
 
+## Demonstration
+
+![Stock Tracker Demo](recording.gif)
+
 ## Technology Stack
 
 - **Backend**:
